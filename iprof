@@ -1,0 +1,51 @@
+Last login: Wed Sep 25 16:28:57 on ttys001
+✔ ~
+#!/bin/bash
+
+# Stupid wrapper arround Opencl-intercept-layer
+# All the credit goes to them
+
+#https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md
+
+# Workaround to the creation of 'CLIntercept_Dump' directory
+export CLI_ReportToStderr=1
+export CLI_ReportToFile=0
+export CLI_DumpDir='/dev/shm'
+
+export CLI_DllName=$(whichlib libOpenCL.so | head -n 1)
+
+VERBOSE=false
+ASM=false
+
+while true; do
+  case "$1" in
+    -v | --verbose ) VERBOSE=true; shift ;;
+    -a | --asm ) ASM=true; shift ;;
+    -- ) shift; break ;;
+    * ) break ;;
+  esac
+done
+
+export CLI_DevicePerformanceTiming=1
+export CLI_HostPerformanceTiming=1
+
+if [ "$ASM" = true ] ; then
+    export CLI_DumpDir="$PWD/isa_dump"
+    export CLI_DumpKernelISABinaries=1
+fi
+
+if [ "$VERBOSE" = true ] ; then
+    export CLI_DevicePerformanceTimelineLogging=1
+    export CLI_CallLogging=1
+else
+    export CLI_SuppressLogging=1
+fi
+
+cliloader "$@"
+
+if [ "$ASM" = true ] ; then
+    for isabin in $CLI_DumpDir/*.isabin; do
+         iga64 -d $isabin -p=9 &> "$(basename "$isabin" .isabin)".asm
+    done
+    rm -rf -- $PWD/isa_dump
+fi
