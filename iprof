@@ -1,17 +1,16 @@
-Last login: Wed Sep 25 16:28:57 on ttys001
-✔ ~
 #!/bin/bash
 
 # Stupid wrapper arround Opencl-intercept-layer
 # All the credit goes to them
 
-#https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md
+# https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md
 
 # Workaround to the creation of 'CLIntercept_Dump' directory
 export CLI_ReportToStderr=1
 export CLI_ReportToFile=0
 export CLI_DumpDir='/dev/shm'
 
+# Maybe people have libOpenCL in a strange location...
 export CLI_DllName=$(whichlib libOpenCL.so | head -n 1)
 
 VERBOSE=false
