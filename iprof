@@ -3,7 +3,7 @@
 # Stupid wrapper arround Opencl-intercept-layer
 # All the credit goes to them
 
-function whichlib{
+function whichlib {
   ldconfig -vNX $(echo $LD_LIBRARY_PATH | sed 's/:/ /g') 2>/dev/null |
   #/usr/lib32:
   #       libstdc++.so.6 -> libstdc++.so.6.0.26
