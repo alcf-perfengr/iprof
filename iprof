@@ -18,21 +18,19 @@ display_help() {
     echo 
     echo " For more informations see "
     echo "   https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md"
-    # echo some stuff here for the -a or --add-options 
     exit 1
 }
-
-if [ $# -eq 0 ]; then
-    display_help;
-fi
 
 #  _                                    
 # |_) _. ._ _ o ._   _     /\  ._ _     
 # |  (_| | _> | | | (_|   /--\ | (_| \/ 
 #                    _|           _|    
 
-VERBOSE=false
-ASM=false
+if [ $# -eq 0 ]; then
+        display_help;
+fi
+
+VERBOSE=false;  ASM=false
 while true; do
   case "$1" in
     -h | --help) display_help;;
