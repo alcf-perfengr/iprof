@@ -47,8 +47,13 @@ done
 # (_   _ _|_ _|_ o ._   _    /  |   |    /   _  ._ _|_ ._ _  | 
 # __) (/_ |_  |_ | | | (_|   \_ |_ _|_   \_ (_) | | |_ | (_) | 
 #                       _|                                    
-
 # https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md
+
+# If people already set some CLI_ variable, respect their will. Common decency.
+function lazy_export {
+    # Export $1 with the value $2 if it was not already set to a non empty string.
+    export $1=${!1:=$2}
+}   
 
 # Maybe people have libOpenCL in a strange location...
 function whichlib {
@@ -58,32 +63,32 @@ function whichlib {
   gawk -v p=$1 'match($0, /^(\S*):/, m)           { header=m[1] }    \
                 match($1, "^lib") && match($1, p) { print header "/" $1}'
 }
-export CLI_DllName=$(whichlib libOpenCL.so | head -n 1)
+lazy_export CLI_DllName $(whichlib libOpenCL.so | head -n 1)
 
 
 # Workaround to the creation of 'CLIntercept_Dump' directory
-export CLI_ReportToStderr=1
-export CLI_ReportToFile=0
-export CLI_DumpDir='/dev/shm'
+lazy_export CLI_ReportToStderr 1
+lazy_export CLI_ReportToFile 0
+lazy_export CLI_DumpDir '/dev/shm'
 
 # Always print Host and Device Information
-export CLI_DevicePerformanceTiming=1
-export CLI_HostPerformanceTiming=1
+lazy_export CLI_DevicePerformanceTiming 1
+lazy_export CLI_HostPerformanceTiming 1
 
 # If people whant to the see the ASM we will need to dump the binary
 # and then disamble it
 if [ "$ASM" = true ] ; then
-    export CLI_DumpDir="$PWD/isa_dump"
-    export CLI_DumpKernelISABinaries=1
+    tmp_dir=$(mktemp -d -t iprof-asm-XXXXXXXXXX)
+    lazy_export CLI_DumpDir $tmp_dir
+    lazy_export CLI_DumpKernelISABinaries 1
 fi
 
 if [ "$VERBOSE" = true ] ; then
-    export CLI_DevicePerformanceTimelineLogging=1
-    export CLI_CallLogging=1
+    lazy_export CLI_DevicePerformanceTimelineLogging 1
+    lazy_export CLI_CallLogging 1
 else
-    export CLI_SuppressLogging=1
+    lazy_export CLI_SuppressLogging 1
 fi
-
 #  _                                _   _  
 # |_)     ._  ._  o ._   _     /\  |_) |_) 
 # | \ |_| | | | | | | | (_|   /--\ |   |   
@@ -91,15 +96,14 @@ fi
 
 cliloader "$@"
 
-
 #  _                                                              
 # |_   _|_ ._ _.  _ _|_ o ._   _     /\   _  _  _  ._ _  |_  |    
 # |_ >< |_ | (_| (_  |_ | | | (_|   /--\ _> _> (/_ | | | |_) | \/ 
 #                              _|                              /  
 
 if [ "$ASM" = true ] ; then
-    for isabin in $CLI_DumpDir/*.isabin; do
+    for isabin in $tmp_dir/*.isabin; do
          iga64 -d $isabin -p=9 &> "$(basename "$isabin" .isabin)".asm
     done
-    rm -rf -- $PWD/isa_dump
+    rm -rf $tmp_dir
 fi
