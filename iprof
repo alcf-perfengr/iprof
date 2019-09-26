@@ -69,7 +69,6 @@ lazy_export CLI_DllName $(whichlib libOpenCL.so | head -n 1)
 # Workaround to the creation of 'CLIntercept_Dump' directory
 lazy_export CLI_ReportToStderr 1
 lazy_export CLI_ReportToFile 0
-lazy_export CLI_DumpDir '/dev/shm'
 
 # Always print Host and Device Information
 lazy_export CLI_DevicePerformanceTiming 1
@@ -81,6 +80,9 @@ if [ "$ASM" = true ] ; then
     tmp_dir=$(mktemp -d -t iprof-asm-XXXXXXXXXX)
     lazy_export CLI_DumpDir $tmp_dir
     lazy_export CLI_DumpKernelISABinaries 1
+else
+    # Workaround to the creation of 'CLIntercept_Dump' directory
+    lazy_export CLI_DumpDir '/dev/shm'
 fi
 
 if [ "$VERBOSE" = true ] ; then
@@ -103,7 +105,10 @@ cliloader "$@"
 
 if [ "$ASM" = true ] ; then
     for isabin in $tmp_dir/*.isabin; do
-         iga64 -d $isabin -p=9 &> "$(basename "$isabin" .isabin)".asm
+        asm="$(basename "$isabin" .isabin)".asm
+        # Yes, you can put the redirection at the front
+        >&2 echo "Generating $asm"
+        iga64 -d $isabin -p=9 &> $asm
     done
     rm -rf $tmp_dir
 fi
