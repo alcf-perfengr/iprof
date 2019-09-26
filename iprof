@@ -3,30 +3,39 @@
 # Stupid wrapper arround Opencl-intercept-layer
 # All the credit goes to them
 
-function whichlib {
-  ldconfig -vNX $(echo $LD_LIBRARY_PATH | sed 's/:/ /g') 2>/dev/null |
-  #/usr/lib32:
-  #       libstdc++.so.6 -> libstdc++.so.6.0.26
-  #        libgcc_s.so.1 -> libgcc_s.so.1
-  gawk -v p=$1 'match($0, /^(\S*):/, m)           { header=m[1] }    \
-                match($1, "^lib") && match($1, p) { print header "/" $1}'
+display_help() {
+    echo "$(basename $0) a simple wrapper arrount Opencl-intercept-layer"
+    echo "Usage:"
+    echo " $0 -h | --help "
+    echo " $0 [-v | --verbose] [-a | --asm] <application> <application-arguments>"
+    echo
+    echo "   -h --help          Show this screen."
+    echo "   -v, --verbose      Display all the OpenCL command excuted."
+    echo "   -a, --asm          Dump in your current directory the assembly for all your kernel."
+    echo
+    echo " Example:"
+    echo " $0 ./a.out"
+    echo 
+    echo " For more informations see "
+    echo "   https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md"
+    # echo some stuff here for the -a or --add-options 
+    exit 1
 }
 
-# https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md
+if [ $# -eq 0 ]; then
+    display_help;
+fi
 
-# Workaround to the creation of 'CLIntercept_Dump' directory
-export CLI_ReportToStderr=1
-export CLI_ReportToFile=0
-export CLI_DumpDir='/dev/shm'
-
-# Maybe people have libOpenCL in a strange location...
-export CLI_DllName=$(whichlib libOpenCL.so | head -n 1)
+#  _                                    
+# |_) _. ._ _ o ._   _     /\  ._ _     
+# |  (_| | _> | | | (_|   /--\ | (_| \/ 
+#                    _|           _|    
 
 VERBOSE=false
 ASM=false
-
 while true; do
   case "$1" in
+    -h | --help) display_help;;
     -v | --verbose ) VERBOSE=true; shift ;;
     -a | --asm ) ASM=true; shift ;;
     -- ) shift; break ;;
@@ -34,9 +43,35 @@ while true; do
   esac
 done
 
+#  __                         _    ___    _                    
+# (_   _ _|_ _|_ o ._   _    /  |   |    /   _  ._ _|_ ._ _  | 
+# __) (/_ |_  |_ | | | (_|   \_ |_ _|_   \_ (_) | | |_ | (_) | 
+#                       _|                                    
+
+# https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md
+
+# Maybe people have libOpenCL in a strange location...
+function whichlib {
+  ldconfig -vNX $(echo $LD_LIBRARY_PATH | sed 's/:/ /g') 2>/dev/null |
+  #/usr/lib32:
+  #       libstdc++.so.6 -> libstdc++.so.6.0.26
+  gawk -v p=$1 'match($0, /^(\S*):/, m)           { header=m[1] }    \
+                match($1, "^lib") && match($1, p) { print header "/" $1}'
+}
+export CLI_DllName=$(whichlib libOpenCL.so | head -n 1)
+
+
+# Workaround to the creation of 'CLIntercept_Dump' directory
+export CLI_ReportToStderr=1
+export CLI_ReportToFile=0
+export CLI_DumpDir='/dev/shm'
+
+# Always print Host and Device Information
 export CLI_DevicePerformanceTiming=1
 export CLI_HostPerformanceTiming=1
 
+# If people whant to the see the ASM we will need to dump the binary
+# and then disamble it
 if [ "$ASM" = true ] ; then
     export CLI_DumpDir="$PWD/isa_dump"
     export CLI_DumpKernelISABinaries=1
@@ -49,7 +84,18 @@ else
     export CLI_SuppressLogging=1
 fi
 
+#  _                                _   _  
+# |_)     ._  ._  o ._   _     /\  |_) |_) 
+# | \ |_| | | | | | | | (_|   /--\ |   |   
+#                        _|                
+
 cliloader "$@"
+
+
+#  _                                                              
+# |_   _|_ ._ _.  _ _|_ o ._   _     /\   _  _  _  ._ _  |_  |    
+# |_ >< |_ | (_| (_  |_ | | | (_|   /--\ _> _> (/_ | | | |_) | \/ 
+#                              _|                              /  
 
 if [ "$ASM" = true ] ; then
     for isabin in $CLI_DumpDir/*.isabin; do
