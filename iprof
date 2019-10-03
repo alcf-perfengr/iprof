@@ -16,7 +16,7 @@ display_help() {
     echo " Example:"
     echo " $0 ./a.out"
     echo 
-    echo " For more informations see "
+    echo " For more informations about Opencl-intercept-layer see "
     echo "   https://github.com/intel/opencl-intercept-layer/blob/master/docs/controls.md"
     exit 1
 }
