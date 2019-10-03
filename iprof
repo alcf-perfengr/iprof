@@ -10,8 +10,8 @@ display_help() {
     echo " $0 [-v | --verbose] [-a | --asm] <application> <application-arguments>"
     echo
     echo "   -h --help          Show this screen."
-    echo "   -v, --verbose      Display all the OpenCL command excuted."
-    echo "   -a, --asm          Dump in your current directory the assembly for all your kernel."
+    echo "   -v, --verbose      Display all the OpenCL command excuted and their arguments."
+    echo "   -a, --asm          Dump in your current directory the assembly for all your kernels."
     echo
     echo " Example:"
     echo " $0 ./a.out"
