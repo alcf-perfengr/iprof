@@ -55,6 +55,8 @@ function lazy_export {
 
 # Maybe people have libOpenCL in a strange location...
 function whichlib {
+  # For more information see `https://github.com/TApplencourt/which`.
+  # If you don't have awk installed just export CLI_DllName to the correct location and ignore the error message
   ldconfig -vNX $(echo $LD_LIBRARY_PATH | sed 's/:/ /g') 2>/dev/null |
   #/usr/lib32:
   #       libstdc++.so.6 -> libstdc++.so.6.0.26  
