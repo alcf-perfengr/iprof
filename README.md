@@ -4,6 +4,9 @@ Get some tinming and API trace.
 
 For now work with OpenMP, SYCL, DPC++, OpenCL. (aka all programing model with an OpenCL backend)
 
+## Requirement
+ - https://github.com/intel/opencl-intercept-layer  (duh)
+
 ## Usage
 ```
 iprof a simple wrapper arrount Opencl-intercept-layer
