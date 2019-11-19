@@ -91,7 +91,7 @@ if [ "$VERBOSE" = true ] ; then
     # Log the 'simd' size of kernel
     lazy_export CLI_DevicePerformanceTimeKernelInfoTracking 1
     # Log the device execution times for each OpenCL command.
-    lazy_export CLI_DevicePerformanceTimelineLogging 1
+    lazy_export CLI_DevicePerformanceTimeLogging 1
 else
     lazy_export CLI_SuppressLogging 1
 fi
